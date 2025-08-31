@@ -39,7 +39,7 @@ export class TestWatcher {
         if (parser) {
             try {
                 const results = await parser.parseTestFile(filePath);
-                const token = await this.authService.getAuthToken();
+                const token = await this.authService.gettoken();
                 
                 // Filter out results with status "skipped" to match the expected type
                 const filteredResults = results.filter(r => r.status !== "skipped");

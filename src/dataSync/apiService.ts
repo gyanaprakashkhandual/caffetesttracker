@@ -10,7 +10,7 @@ export interface TestResult {
 }
 
 export class ApiService {
-    private baseUrl = 'https://your-webapp.com/api';
+    private baseUrl = 'http://localhost:5000/api/v1/test';
 
     async sendTestResults(results: TestResult[], authToken: string): Promise<boolean> {
         try {

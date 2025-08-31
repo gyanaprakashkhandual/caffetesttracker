@@ -32,7 +32,7 @@ export class AuthService {
 
             // Get API URL from configuration
             const config = vscode.workspace.getConfiguration('testAutomationTracker');
-            const apiUrl = config.get<string>('apiUrl') || 'https://your-webapp.com/api/v1';
+            const apiUrl = config.get<string>('apiUrl') || 'http://localhost:5000/api/v1';
 
             // Your JavaScript web app API endpoint
             const response = await fetch(`${apiUrl}/auth/login`, {
@@ -61,7 +61,7 @@ export class AuthService {
             const data = await response.json() as { auth_token?: string; token?: string; user?: UserData };
             
             // Store authentication data
-            await this.context.secrets.store('authToken', data.auth_token || data.token || '');
+            await this.context.secrets.store('token', data.auth_token || data.token || '');
             await this.context.secrets.store('userData', JSON.stringify(data.user));
             await this.context.secrets.store('lastLogin', Date.now().toString());
 
@@ -78,7 +78,7 @@ export class AuthService {
 
     async isLoggedIn(): Promise<boolean> {
         try {
-            const token = await this.context.secrets.get('authToken');
+            const token = await this.context.secrets.get('token');
             if (!token) return false;
 
             // Check if token is expired (optional)
@@ -103,10 +103,10 @@ export class AuthService {
     async logout(): Promise<void> {
         try {
             // Optional: Call logout API
-            const token = await this.getAuthToken();
+            const token = await this.gettoken();
             if (token) {
                 const config = vscode.workspace.getConfiguration('testAutomationTracker');
-                const apiUrl = config.get<string>('apiUrl') || 'https://your-webapp.com/api/v1';
+                const apiUrl = config.get<string>('apiUrl') || 'http://localhost:5000/api/v1';
                 
                 await fetch(`${apiUrl}/auth/logout`, {
                     method: 'POST',
@@ -119,7 +119,7 @@ export class AuthService {
             // Ignore errors during logout
         } finally {
             // Clear stored data
-            await this.context.secrets.delete('authToken');
+            await this.context.secrets.delete('token');
             await this.context.secrets.delete('userData');
             await this.context.secrets.delete('lastLogin');
             await this.context.globalState.update('isLoggedIn', false);
@@ -127,8 +127,8 @@ export class AuthService {
         }
     }
 
-    async getAuthToken(): Promise<string | undefined> {
-        return this.context.secrets.get('authToken');
+    async gettoken(): Promise<string | undefined> {
+        return this.context.secrets.get('token');
     }
 
     async getUserData(): Promise<UserData | null> {
@@ -148,18 +148,18 @@ export class AuthService {
     }
 
     private getExtensionVersion(): string {
-        const extension = vscode.extensions.getExtension('your-company.test-automation-tracker');
+        const extension = vscode.extensions.getExtension('caffetest.test-automation-tracker');
         return extension?.packageJSON.version || '1.0.0';
     }
 
     // Optional: Token refresh functionality
     async refreshToken(): Promise<boolean> {
         try {
-            const token = await this.getAuthToken();
+            const token = await this.gettoken();
             if (!token) return false;
 
             const config = vscode.workspace.getConfiguration('testAutomationTracker');
-            const apiUrl = config.get<string>('apiUrl') || 'https://your-webapp.com/api/v1';
+            const apiUrl = config.get<string>('apiUrl') || 'http://localhost:5000/api/v1';
 
             const response = await fetch(`${apiUrl}/auth/refresh`, {
                 method: 'POST',
@@ -170,7 +170,7 @@ export class AuthService {
 
             if (response.ok) {
                 const data = await response.json() as { auth_token?: string; token?: string };
-                await this.context.secrets.store('authToken', data.auth_token || data.token || '');
+                await this.context.secrets.store('token', data.auth_token || data.token || '');
                 await this.context.secrets.store('lastLogin', Date.now().toString());
                 return true;
             }
